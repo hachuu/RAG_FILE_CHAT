@@ -1,0 +1,4 @@
+{
+  "appService.defaultWebAppToDeploy": "/subscriptions/2e0e8e71-8cf1-4068-b548-5e36761f05bc/resourceGroups/appsvc_linux_eastasia_basic/providers/Microsoft.Web/sites/rag-chat-bot",
+  "appService.deploySubpath": "."
+}
