@@ -44,10 +44,39 @@ if uploaded_file and not st.session_state.vectorstore_created:
         st.session_state.vectorstore_created = True
         st.success("✅ 문서 분석 완료! 이제 질문해보세요.")
 
-# 대화 UI
+# # 대화 UI
+# if st.session_state.vectorstore_created:
+#     with st.form("chat_input_form", clear_on_submit=True):
+#         user_input = st.text_input("💬 궁금한 내용을 입력하세요", key="input")
+#         submitted = st.form_submit_button("전송")
+
+#         if submitted and user_input:
+#             with st.spinner("🤖 답변 생성 중..."):
+#                 result = st.session_state.qa({"question": user_input})
+#                 st.session_state.chat_history.append(("user", user_input))
+#                 st.session_state.chat_history.append(("ai", result["answer"]))
+
+#     # 채팅 히스토리 출력
+#     for i, (sender, message) in enumerate(st.session_state.chat_history):
+#         if sender == "user":
+#             st.markdown(f"🧑‍💬 **나:** {message}")
+#         else:
+#             st.markdown(f"🤖 **AI:** {message}")
+
+#     # 🧠 문맥 디버깅용 출력
+#     with st.expander("🧠 대화 메모리 디버깅 보기"):
+#         memory = st.session_state.memory
+#         if memory.buffer:
+#             for msg in memory.buffer:
+#                 role = "👤 사용자" if msg.type == "human" else "🤖 AI"
+#                 st.markdown(f"**{role}:** {msg.content}")
+#         else:
+#             st.info("아직 대화 메모리가 비어 있어요.")
+
+# 채팅 UI
 if st.session_state.vectorstore_created:
     with st.form("chat_input_form", clear_on_submit=True):
-        user_input = st.text_input("💬 궁금한 내용을 입력하세요", key="input")
+        user_input = st.text_input("💬 질문을 입력하세요", key="input")
         submitted = st.form_submit_button("전송")
 
         if submitted and user_input:
@@ -56,14 +85,37 @@ if st.session_state.vectorstore_created:
                 st.session_state.chat_history.append(("user", user_input))
                 st.session_state.chat_history.append(("ai", result["answer"]))
 
-    # 채팅 히스토리 출력
-    for i, (sender, message) in enumerate(st.session_state.chat_history):
-        if sender == "user":
-            st.markdown(f"🧑‍💬 **나:** {message}")
-        else:
-            st.markdown(f"🤖 **AI:** {message}")
+    # 채팅 히스토리 (최신 대화 강조)
+    if st.session_state.chat_history:
+        st.markdown("### 🗨️ 대화 내용")
 
-    # 🧠 문맥 디버깅용 출력
+        for idx, (sender, message) in enumerate(st.session_state.chat_history):
+            is_latest = (idx >= len(st.session_state.chat_history) - 2)
+
+            # 최신 메시지 강조 스타일
+            bubble_style = """
+                background-color: %s;
+                padding: 0.75rem;
+                border-radius: 1rem;
+                margin-bottom: 0.5rem;
+                max-width: 80%%;
+            """ % ("#e0f7fa" if is_latest else "#f0f0f0")
+
+            role = "🧑‍💬 **나:**" if sender == "user" else "🤖 **AI:**"
+            align = "flex-end" if sender == "user" else "flex-start"
+
+            st.markdown(
+                f"""
+                <div style="display: flex; justify-content: {align};">
+                    <div style="{bubble_style}">
+                        {role}<br>{message}
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+    # 🧠 대화 메모리 디버깅용 출력
     with st.expander("🧠 대화 메모리 디버깅 보기"):
         memory = st.session_state.memory
         if memory.buffer:
@@ -72,3 +124,4 @@ if st.session_state.vectorstore_created:
                 st.markdown(f"**{role}:** {msg.content}")
         else:
             st.info("아직 대화 메모리가 비어 있어요.")
+
